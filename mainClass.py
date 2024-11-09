@@ -81,7 +81,7 @@ class MainClass:
 			if win:
 				print(f"  See {data['titles'][self.race]}")
 				win.activate()
-				win.move(x=0, y=0, width=1275, height=940)
+				win.move(x=0, y=0, width=950, height=1000)
 				sleep(3)
 			else:
 				print(f"    AHK doesn't see {data['titles'][self.race]}")
@@ -1506,7 +1506,8 @@ class MainClass:
 								succes = False
 								moveNumber += 1
 								for _ in range(3):
-									ready = pyautogui.locateOnScreen(f"img/collection/ready{myUnit}.png", minSearchTime=2, region=(450,300,370,350), confidence=.94)
+									if magic:
+										ready = pyautogui.locateOnScreen(f"img/collection/ready{myUnit}.png", minSearchTime=2, region=(450,300,370,350), confidence=.94)
 									if ready:
 										print("          see ready after Magic | Click enemy")
 										if len(enemyList) > 1:
@@ -1790,9 +1791,67 @@ class MainClass:
 					continue
 			sleep(1.5)
 		print("  EXXXCEPTION COMBAT | MORE THAN 10 MOVES")
+	def combatSimple(self, enemyUnit = "Troll"):
+		print("Run Combat Simple Method")
+		moveNumber = 1
+		for _ in range(15):
+			timeBefor = time.time()
+			enemies = pyautogui.locateAllOnScreen(f"img/collection/enemy{enemyUnit}.png", region=(300,300,370,350), confidence=.94)
+			enemyList = list(enemies)
+			if enemyList:
+				print("      Found enemies")
+				for _ in range(25):
+					if moveNumber > 1:
+						enemies = pyautogui.locateAllOnScreen(f"img/collection/enemy{enemyUnit}.png", region=(300,300,370,350), confidence=.94)
+					if enemyList:
+						if len(enemyList) > 1:
+							print("Squads more than 1")
+							if moveNumber > 1:
+								while time.time() <= (timeBefor + 1 + random.randint(2,3)/10):
+									sleep(.05)
+							timeBefor = time.time()
+							click(enemyList[0])
+							click(enemyList[1])
+							pyautogui.moveTo(100, 100)
+							moveNumber += 1
+							enemyList = list(enemies)
+						else:
+							print("Only 1 squad")
+							if moveNumber > 1:
+								while time.time() <= (timeBefor + 1 + random.randint(2,3)/10):
+									sleep(.05)
+							timeBefor = time.time()
+							click(enemyList[0])
+							pyautogui.moveTo(100, 100)
+							moveNumber += 1
+							enemyList = list(enemies)
+						if self.logHandler("server -> client: 114"):
+							print("    The battle is completed successfully")
+							sleep(2)
+							self.leftSoft()
+							return True
+					else:
+						print("      Don't see ENEMIES")
+						enemyList = list(enemies)
+						sleep(.3)
+			else:
+				print("      Don't see ENEMIES")
+			if self.logHandler("server -> client: 114"):
+				print("    The battle is completed successfully")
+				sleep(2)
+				self.leftSoft()
+				return True
+			if self.clMessageCheckImage():
+				continue
+		if self.logHandler("server -> client: 114"):
+			print("    The battle is completed successfully")
+			sleep(2)
+			self.leftSoft()
+			return True
+		print("  EXXXCEPTION COMBAT | MORE THAN 50 MOVES")
 	def startMove(self, firstKey = "down"):
 		print("Start move ")
-		for _ in range(3):
+		for _ in range(2):
 			arrows = (firstKey, 'up', 'left', 'right', "down")
 			for arrow in arrows:
 				sleep(.3)
@@ -2404,7 +2463,7 @@ class MainClass:
 								print("    The npc joins or was killed")
 								for _ in range(3):
 									print("      Don't see peace agreement")
-									battleImpossible = pyautogui.locateOnScreen("img/collection/battleImpossible.png", minSearchTime=2, region=(400, 0, 500, 300), confidence=.95, grayscale = True)
+									battleImpossible = pyautogui.locateOnScreen("img/collection/battleImpossible.png", minSearchTime=2, region=(100, 0, 800, 300), confidence=.95, grayscale = True)
 									if battleImpossible:
 										print("        Battle Impossible | Click LSoft")
 										self.leftSoft()
@@ -2419,8 +2478,11 @@ class MainClass:
 									if unit == "Camel":
 										if self.combatFarm(magic = magic):
 											return "Battle"
+									# elif unit == "Dragon":
+									# 	if self.combatFarm(magic = magic, myUnit="Necromancer"):
+									# 		return "Battle"
 									elif unit == "Dragon":
-										if self.combatFarm(magic = magic, myUnit="Necromancer"):
+										if self.combatSimple():
 											return "Battle"
 						print("  EXCEPTION col2")
 					sleep(1)
@@ -2433,8 +2495,11 @@ class MainClass:
 					if unit == "Camel":
 						if self.combatFarm(magic = magic):
 							return "Battle"
+					# elif unit == "Dragon":
+					# 	if self.combatFarm(magic = magic, myUnit="Necromancer"):
+					# 		return "Battle"
 					elif unit == "Dragon":
-						if self.combatFarm(magic = magic, myUnit="Necromancer"):
+						if self.combatSimple():
 							return "Battle"
 			if unit == "Camel":
 				if self.clMessageCheckImage():
@@ -2473,7 +2538,7 @@ class MainClass:
 										print("      EXCEPTION col4")
 									else:
 										print("      Don't see peace agreement")
-										battleImpossible = pyautogui.locateOnScreen("img/collection/battleImpossible.png", minSearchTime=2, region=(400, 0, 500, 300), confidence=.95, grayscale = True)
+										battleImpossible = pyautogui.locateOnScreen("img/collection/battleImpossible.png", minSearchTime=2, region=(100, 0, 800, 300), confidence=.95, grayscale = True)
 										if battleImpossible:
 											print("        Battle Impossible | Click LSoft")
 											self.leftSoft()
@@ -2530,7 +2595,7 @@ class MainClass:
 									else:
 										print("      Don't see peace agreement")
 										print("      Npc has not joined")
-										battleImpossible = pyautogui.locateOnScreen("img/collection/battleImpossible.png", minSearchTime=2, region=(400, 0, 500, 300), confidence=.95, grayscale = True)
+										battleImpossible = pyautogui.locateOnScreen("img/collection/battleImpossible.png", minSearchTime=2, region=(100, 0, 800, 300), confidence=.95, grayscale = True)
 										if battleImpossible:
 											self.send_message("Battle Impossible | Click LSoft", self.token2)
 											self.leftSoft()
@@ -2585,7 +2650,7 @@ class MainClass:
 										print("      EXCEPTION col4")
 									else:
 										print("      Don't see peace agreement")
-										battleImpossible = pyautogui.locateOnScreen("img/collection/battleImpossible.png", minSearchTime=2, region=(400, 0, 500, 300), confidence=.95, grayscale = True)
+										battleImpossible = pyautogui.locateOnScreen("img/collection/battleImpossible.png", minSearchTime=2, region=(100, 0, 800, 300), confidence=.95, grayscale = True)
 										if battleImpossible:
 											self.send_message("        Battle Impossible | Click LSoft")
 											self.leftSoft()
