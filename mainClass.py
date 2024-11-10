@@ -1280,7 +1280,8 @@ class MainClass:
 			battle = pyautogui.locateOnScreen(f"img/collection/battleField.png", minSearchTime=2, region=(0,0,600,400), confidence=.9)
 			if battle:
 				self.battleNumber += 1
-				self.send_message(f"  Battle {self.battleNumber} started", self.token2)
+				if random.randint(1, 3) == 3:
+					self.send_message(f"  Battle {self.battleNumber} started", self.token2)
 				return True
 			if self.clMessageCheckImage():
 				continue
@@ -1587,6 +1588,7 @@ class MainClass:
 
 			sleep(1.5)
 		print("  EXXXCEPTION COMBAT | MORE THAN 25 MOVES")
+		return False
 	def combatPumpkin(self, myUnit = "Dragon", enemyUnit = "Troll", magicSpell = "PowerOfDeath", magic = True):
 		print("Run CombatPumpkin Method")
 		moveNumber = 1
@@ -1807,7 +1809,7 @@ class MainClass:
 						if len(enemyList) > 1:
 							print("Squads more than 1")
 							if moveNumber > 1:
-								while time.time() <= (timeBefor + 1 + random.randint(2,3)/10):
+								while time.time() <= (timeBefor + 1 + random.randint(1,2)/10):
 									sleep(.05)
 							timeBefor = time.time()
 							click(enemyList[0])
@@ -1818,7 +1820,7 @@ class MainClass:
 						else:
 							print("Only 1 squad")
 							if moveNumber > 1:
-								while time.time() <= (timeBefor + 1 + random.randint(2,3)/10):
+								while time.time() <= (timeBefor + 1 + random.randint(1,2)/10):
 									sleep(.05)
 							timeBefor = time.time()
 							click(enemyList[0])
@@ -1849,6 +1851,7 @@ class MainClass:
 			self.leftSoft()
 			return True
 		print("  EXXXCEPTION COMBAT | MORE THAN 50 MOVES")
+		return False
 	def startMove(self, firstKey = "down"):
 		print("Start move ")
 		for _ in range(2):
@@ -2152,12 +2155,8 @@ class MainClass:
 					self.farm12 = 1
 			elif len(botList) == 1:
 				print('    1 bot')
-				if botList[0][0] != self.lastBot[0] and botList[0][1] != self.lastBot[1]:
-					print("      The bot's coordinates differ from the previous ones | CLICK")
-					click(botList[0])
-					self.lastBot = botList[0]
-				else:
-					print("      coordinates match | NOCLICK")
+				click(botList[0])
+				self.lastBot = botList[0]
 			clickBot = pyautogui.locateCenterOnScreen(f"img/clickBot.png", minSearchTime=2, region=(0, 500, 700, 524), confidence=.92)
 			if clickBot:
 				print("    FOUND click BOT")
@@ -2478,12 +2477,16 @@ class MainClass:
 									if unit == "Camel":
 										if self.combatFarm(magic = magic):
 											return "Battle"
+										else:
+											return "FailedBattle"
 									# elif unit == "Dragon":
 									# 	if self.combatFarm(magic = magic, myUnit="Necromancer"):
 									# 		return "Battle"
 									elif unit == "Dragon":
 										if self.combatSimple():
 											return "Battle"
+										else:
+											return "FailedBattle"
 						print("  EXCEPTION col2")
 					sleep(1)
 				print("  EXCEPTION col1")
@@ -2495,12 +2498,16 @@ class MainClass:
 					if unit == "Camel":
 						if self.combatFarm(magic = magic):
 							return "Battle"
+						else:
+							return "FailedBattle"
 					# elif unit == "Dragon":
 					# 	if self.combatFarm(magic = magic, myUnit="Necromancer"):
 					# 		return "Battle"
 					elif unit == "Dragon":
 						if self.combatSimple():
 							return "Battle"
+						else:
+							return "FailedBattle"
 			if unit == "Camel":
 				if self.clMessageCheckImage():
 					continue
@@ -2676,6 +2683,42 @@ class MainClass:
 				if self.searchBattle():
 					if self.combatExtented(myUnit = "Dragon", enemyUnit = "Spider", magicSpell = "BlindingLight"):
 						return True
+	def zeroExp(self, keyPhrase = "img=header_bg.png"):
+		print(f"ZERO CHECK. LS the log file | Start with {self.endingIndex}")
+		with open(log_file_path, 'r') as file:
+			file = file.read()
+		position = file.rfind(keyPhrase)
+		if position != -1:
+			print(f'  LOG 1 SUCCES {keyPhrase} found on position {position}')
+			expPosition = file.find("?????????? ?????: ", position)
+			if expPosition != -1:
+				print(f'    LOG 2 SUCCES | experience found on position {expPosition}')
+				experience = file[expPosition + 18 : expPosition + 18 + 2]
+				print(f"    Experience is {experience}")
+				if experience.strip() == '0':
+					resExpPosition = file.find("????????????????? ????: ", expPosition)
+					if resExpPosition != -1:
+						print(f'      LOG 3 SUCCES | experience found on position {resExpPosition}')
+						resExperience = file[resExpPosition + 21 : resExpPosition + 23]
+						print(f"       Reserve experience is {resExperience}")
+						if resExperience.strip() == '0':
+							print(f"        Zero check is successful. ZERO")
+							return True
+						else:
+							print(f"        Zero check is successful. NOT ZERO")
+							return False
+					else:
+						print("        Don't see reserve experience. Completed")
+						return True
+				else:
+					print(f"      Zero check is successful. NOT ZERO")
+					return False
+			else:
+				print(f"    Can't find Experience")
+				return False
+		else:
+			print(f'  log FAILED {keyPhrase} not found within range [{self.endingIndex} - end]')
+			return False
 	def followTheRoute(self, route, unit = "Dragon", collect = False, disband = False, maxJoin = 9, exactCoors = (-1, -1)):
 		self.send_message("Move along the route", self.token2)
 		point = 0
@@ -2715,7 +2758,7 @@ class MainClass:
 					self.moveOnMap(coors[0] + deltaX, coors[1] + deltaY)
 		self.send_message("  Route completion Successful", self.token2)
 		return True
-	def followTheRoutePumpkin(self, route, unit = "Dragon", collect = False, exactCoors = (-1, -1)):
+	def followTheRoutePumpkin(self, route, unit = "Dragon", collect = False, exactCoors = (-1, -1), zero = False):
 		self.send_message("Move along the route", self.token2)
 		point = 0
 		if exactCoors[0] == 0 and exactCoors[1] == 0:
@@ -2735,12 +2778,18 @@ class MainClass:
 				return False
 			else:
 				point += 1
-				self.send_message(f"    Point {point} ({coors[0]}:{coors[1]}) has been reached", self.token2)
+				print(f"    Point {point} ({coors[0]}:{coors[1]}) has been reached")
+				if zero:
+					if self.battleNumber > 0 and self.battleNumber % 3 == 0:
+						if self.zeroExp():
+							return False
 				if collect:
 					for k in range(1):
 						fg = self.farmingGold(unit = "Dragon", magic = False, magnetAngle = "3")
 						if fg == "NOBOTS":
 							print("    NOBOTS")
+						elif fg == "FailedBattle":
+							return False
 						else:
 							if not self.moveOnMap(coors[0] + deltaX, coors[1] + deltaY, npcAttack = False):
 								print(f"    Can't move in coordinates {coors[0] + deltaX} {coors[1] + deltaY}")
