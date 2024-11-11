@@ -241,7 +241,7 @@ class MainClass:
 	def defineTheCityImage(self, neededCity):
 		self.send_message("Recognize the name of the city by Image", self.token2)
 		for _ in range(3):
-			recogCity = pyautogui.locateOnScreen(f"img/collection/city{neededCity}.png", minSearchTime=2, confidence=.9, region=(400, 0, 400, 250))
+			recogCity = pyautogui.locateOnScreen(f"img/collection/city{neededCity}.png", minSearchTime=2, confidence=.9, region=(200, 0, 600, 250))
 			if recogCity:
 				self.send_message(f"  Succes | Hero are in {neededCity}", self.token2)
 				return True
@@ -1836,6 +1836,11 @@ class MainClass:
 						print("      Don't see ENEMIES")
 						enemyList = list(enemies)
 						sleep(.3)
+						if self.logHandler("server -> client: 114"):
+							print("    The battle is completed successfully")
+							sleep(2)
+							self.leftSoft()
+							return True
 			else:
 				print("      Don't see ENEMIES")
 			if self.logHandler("server -> client: 114"):
@@ -1881,7 +1886,11 @@ class MainClass:
 		for _ in range(3):
 			currentCoors = self.logWalkHandler()
 			if currentCoors:
-				currentX, currentY = currentCoors[0], currentCoors[1]
+				if len(currentCoors) >= 2 and currentCoors[0].isdigit() and currentCoors[1].isdigit():
+					currentX, currentY = currentCoors[0], currentCoors[1]
+				else:
+					self.startMove()
+					continue
 				deltaX, deltaY = int(currentX) - x, int(currentY) - y
 				print(f"  DeltaX, deltaY - {-deltaX}, {-deltaY}")
 				def singleMove(arrow, counterArrow, horizontal = True):
@@ -2475,13 +2484,10 @@ class MainClass:
 								print("    Combat found")
 								if self.searchBattle():
 									if unit == "Camel":
-										if self.combatFarm(magic = magic):
+										if self.combatSimple():
 											return "Battle"
 										else:
 											return "FailedBattle"
-									# elif unit == "Dragon":
-									# 	if self.combatFarm(magic = magic, myUnit="Necromancer"):
-									# 		return "Battle"
 									elif unit == "Dragon":
 										if self.combatSimple():
 											return "Battle"
@@ -2496,21 +2502,18 @@ class MainClass:
 				print("  Character was attacked by an npc")
 				if self.searchBattle():
 					if unit == "Camel":
-						if self.combatFarm(magic = magic):
+						if self.combatSimple():
 							return "Battle"
 						else:
 							return "FailedBattle"
-					# elif unit == "Dragon":
-					# 	if self.combatFarm(magic = magic, myUnit="Necromancer"):
-					# 		return "Battle"
 					elif unit == "Dragon":
 						if self.combatSimple():
 							return "Battle"
 						else:
 							return "FailedBattle"
-			if unit == "Camel":
-				if self.clMessageCheckImage():
-					continue
+			# if unit == "Camel":
+			# 	if self.clMessageCheckImage():
+			# 		continue
 			if sb == 'NOBOTS':
 				return "NOBOTS"
 		print("GOLD FARM METHOD FAILED")
@@ -2785,7 +2788,7 @@ class MainClass:
 							return False
 				if collect:
 					for k in range(1):
-						fg = self.farmingGold(unit = "Dragon", magic = False, magnetAngle = "3")
+						fg = self.farmingGold(unit = unit, magic = False, magnetAngle = "3")
 						if fg == "NOBOTS":
 							print("    NOBOTS")
 						elif fg == "FailedBattle":
@@ -2919,7 +2922,7 @@ class MainClass:
 					continue
 			print("    Economy open Failed | FALSE")
 			return False
-		def logFullnessHandler(fullBag = bagSize, keyPhrase = "Заполненность сумки: "):
+		def logFullnessHandler(fullBag = bagSize, keyPhrase = "text = ????????????? ?????: "):
 			print(f"LS the log file | Start with {self.endingIndex}")
 			with open(log_file_path, 'r') as file:
 				file = file.read()
