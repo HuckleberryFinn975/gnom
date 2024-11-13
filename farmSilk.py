@@ -15,13 +15,9 @@ else:
     bagSize = 35 
 ch = MainClass(race, 0)
 ch.savePID()
-
+point = "right"
 routeTree1A = (30, 3), (19, 4), (13, 4)
-routeTree1B = (29, 8), (17, 7), (9, 3)
-routeTree2A = (35, 11), (26, 10), (16, 13)
-routeTree2B = (32, 14), (23, 8), (11, 11)
-routeTree3A = (38, 9), (33, 15), (35, 25), (23, 28), (22, 39), (11, 30), (6, 20), (3, 9)
-routeTree3B = (40, 16), (30, 27), (19, 39), (6, 30), (14, 20), (10, 6)
+routeTree1B = (29, 8), (17, 7), (12, 2)
 ch.relogin()
 process = subprocess.Popen(['py', 'walkClanMessages.py'])
 ch.activate()
@@ -39,19 +35,11 @@ if ch.checkInTheCity():
                     ch.outOfCharacter()
             ch.leaveTheCity()
             ch.startMove()
-            randRoute = random.randint(1, 6)
+            randRoute = random.randint(1, 2)
             if randRoute == 1:
                 ch.followTheRoutePumpkin(routeTree1A, unit = "Camel", collect=True)
             elif randRoute == 2:
                 ch.followTheRoutePumpkin(routeTree1B, unit = "Camel", collect=True, exactCoors=(17, 7))
-            elif randRoute == 3:
-                ch.followTheRoutePumpkin(routeTree2B, unit = "Camel", collect=True, exactCoors=(26, 10))
-            elif randRoute == 4:
-                ch.followTheRoutePumpkin(routeTree2B, unit = "Camel", collect=True, exactCoors=(23, 8))
-            elif randRoute == 5:
-                ch.followTheRoutePumpkin(routeTree3A, unit = "Camel", collect=True, exactCoors=(6, 20))
-            elif randRoute == 6:
-                ch.followTheRoutePumpkin(routeTree3B, unit = "Camel", collect=True, exactCoors=(19, 39))
         checkBagAndGo()
         lap, side, fails = 0, "1", 0
         while True:
@@ -85,19 +73,20 @@ if ch.checkInTheCity():
                 fails += 1 
                 lap += 1
             elif farmGold == "NOBOTS":
-                dx = random.randint(-1, 1)
-                if dx == 0:
-                    dy = random.randint(-1, 1)
-                else:
-                    dy = 0
                 fails += 1
-                ch.moveOnMap(17 + dx, 12 + dy, npcAttack = False)
+                if point == 'left':
+                    ch.moveOnMap(21, 10, npcAttack = False)
+                    point = 'right'
+                elif point == 'right':
+                    ch.moveOnMap(13, 5, npcAttack = False)
+                    point = 'left'
+                sleep(.5)
             elif farmGold == "FailedBattle":
                 fails += 1 
                 lap += 1
-            if fails >= 10:
-                ch.send_message("MORE 10 FAILS | sleep 60 sec", ch.token1, timeOut = ch.to1)
-                sleep(60)
+            if fails >= 25:
+                ch.send_message("MORE 25 FAILS | sleep 20 sec", ch.token1, timeOut = ch.to1)
+                sleep(20)
                 process.terminate()
                 ch.relogin()
                 process = subprocess.Popen(['py', 'walkClanMessages.py'])

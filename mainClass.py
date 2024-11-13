@@ -1838,22 +1838,28 @@ class MainClass:
 						sleep(.3)
 						if self.logHandler("server -> client: 114"):
 							print("    The battle is completed successfully")
-							sleep(2)
-							self.leftSoft()
+							sleep(1)
+							clanMessage = pyautogui.locateOnScreen(f"img/collection/clanMessage.png", minSearchTime=3, region=(0,500,1280, 524), confidence=.85)
+							if clanMessage:
+								self.leftSoft()
 							return True
 			else:
 				print("      Don't see ENEMIES")
 			if self.logHandler("server -> client: 114"):
 				print("    The battle is completed successfully")
-				sleep(2)
-				self.leftSoft()
+				sleep(1)
+				clanMessage = pyautogui.locateOnScreen(f"img/collection/clanMessage.png", minSearchTime=3, region=(0,500,1280, 524), confidence=.85)
+				if clanMessage:
+					self.leftSoft()
 				return True
 			if self.clMessageCheckImage():
 				continue
 		if self.logHandler("server -> client: 114"):
 			print("    The battle is completed successfully")
-			sleep(2)
-			self.leftSoft()
+			sleep(1)
+			clanMessage = pyautogui.locateOnScreen(f"img/collection/clanMessage.png", minSearchTime=3, region=(0,500,1280, 524), confidence=.85)
+			if clanMessage:
+				self.leftSoft()
 			return True
 		print("  EXXXCEPTION COMBAT | MORE THAN 50 MOVES")
 		return False
@@ -1970,7 +1976,7 @@ class MainClass:
 								press("down", presses = k+1)
 								sleep(.5)
 						elif deltaY >= 0:
-							for _ in range(5):
+							for k in range(5):
 								if singleMove('left', 'right'):
 									break
 								if self.logHandler("server -> client: 24"):
@@ -2702,23 +2708,36 @@ class MainClass:
 					resExpPosition = file.find("????????????????? ????: ", expPosition)
 					if resExpPosition != -1:
 						print(f'      LOG 3 SUCCES | experience found on position {resExpPosition}')
-						resExperience = file[resExpPosition + 21 : resExpPosition + 23]
-						print(f"       Reserve experience is {resExperience}")
-						if resExperience.strip() == '0':
-							print(f"        Zero check is successful. ZERO")
-							return True
-						else:
-							print(f"        Zero check is successful. NOT ZERO")
-							return False
+						print(f"        Zero check is successful. NOT ZERO")
+						return False
 					else:
 						print("        Don't see reserve experience. Completed")
 						return True
 				else:
 					print(f"      Zero check is successful. NOT ZERO")
-					return False
+					return False			
 			else:
-				print(f"    Can't find Experience")
-				return False
+				print('  Search unicode Exp...')
+				expPosition = file.find("Çàðàáîòàíî îïûòà: ", position)
+				if expPosition != -1:
+					print(f'    LOG 2 SUCCES | experience found on position {expPosition}')
+					experience = file[expPosition + 18 : expPosition + 18 + 2]
+					print(f"    Experience is {experience}")
+					if experience.strip() == '0':
+						resExpPosition = file.find("Çàðåçåðâèðîâàííûé îïûò: ", expPosition)
+						if resExpPosition != -1:
+							print(f'      LOG 3 SUCCES | experience found on position {resExpPosition}')
+							print(f"        Zero check is successful. NOT ZERO")
+							return False
+						else:
+							print("        Don't see reserve experience. Completed")
+							return True
+					else:
+						print(f"      Zero check is successful. NOT ZERO")
+						return False			
+				else:
+					print(f"    Can't find Experience")
+					return False
 		else:
 			print(f'  log FAILED {keyPhrase} not found within range [{self.endingIndex} - end]')
 			return False
