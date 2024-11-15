@@ -23,7 +23,7 @@ data = {"titles": {"1": "ELF","2": "ORC", "3": "DEAD", "4": "HUMAN", "5": "DWARF
 equipmentCoors = {"helmet": 195, "amulet": (255, 420), "weapon": (470, 530), "armour": 585, "boots": 630, "flag": 690}
 
 class MainClass:
-	farm12, battleNumber = 1, 0
+	farm12, battleNumber, noNPC = 1, 0, 0
 	joinedBots, startUnit = 0, "Griffin"
 	lastBot, endingIndex, botListLenght = (0,0), 0, 0
 	dissed = False
@@ -1809,8 +1809,12 @@ class MainClass:
 						if len(enemyList) > 1:
 							print("Squads more than 1")
 							if moveNumber > 1:
-								while time.time() <= (timeBefor + 1 + random.randint(1,2)/10):
-									sleep(.05)
+								if moveNumber > 5:
+									while time.time() <= (timeBefor + random.randint(1,2)/10):
+										sleep(.05)	
+								else:
+									while time.time() <= (timeBefor + 1 + random.randint(1,2)/10):
+										sleep(.05)
 							timeBefor = time.time()
 							click(enemyList[0])
 							click(enemyList[1])
@@ -1820,8 +1824,12 @@ class MainClass:
 						else:
 							print("Only 1 squad")
 							if moveNumber > 1:
-								while time.time() <= (timeBefor + 1 + random.randint(1,2)/10):
-									sleep(.05)
+								if moveNumber > 5:
+									while time.time() <= (timeBefor + random.randint(1,2)/10):
+										sleep(.05)	
+								else:
+									while time.time() <= (timeBefor + 1 + random.randint(1,2)/10):
+										sleep(.05)
 							timeBefor = time.time()
 							click(enemyList[0])
 							pyautogui.moveTo(100, 100)
@@ -1829,8 +1837,10 @@ class MainClass:
 							enemyList = list(enemies)
 						if self.logHandler("server -> client: 114"):
 							print("    The battle is completed successfully")
-							sleep(2)
-							self.leftSoft()
+							sleep(1)
+							clanMessage = pyautogui.locateOnScreen(f"img/collection/clanMessage.png", minSearchTime=3, region=(0,500,1280, 524), confidence=.85)
+							if clanMessage:
+								self.leftSoft()
 							return True
 					else:
 						print("      Don't see ENEMIES")
@@ -2152,10 +2162,11 @@ class MainClass:
 		def distance(point1, point2):
 			return math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
 		print("Looking for bots...")
-		bots = pyautogui.locateAllOnScreen(f"img/collection/part{enemy}.png", region=(0, 0, 1280, 1024), confidence=.9)
+		bots = pyautogui.locateAllOnScreen(f"img/collection/part{enemy}.png", region=(0, 0, 1200, 1200), confidence=.9)
 		botList = list(bots)
 		if botList:
 			print("  FOUND BOTs")
+			self.noNPC = 0
 			if len(botList) >= 2:
 				print('    See >= 2 bots')
 				sorted_objects = sorted(botList, key=lambda obj: distance((window_center_x, window_center_y), obj))
@@ -2184,7 +2195,8 @@ class MainClass:
 				print("    Click bot not found")
 				return "NOCLICK"
 		else:
-			print("  dont see boots")
+			self.noNPC += 1
+			print(f"  Don't see boots {self.noNPC}")
 			return 'NOBOTS'
 	def moveEnd(self):
 		print("Try to click EndTurn")
@@ -2517,9 +2529,9 @@ class MainClass:
 							return "Battle"
 						else:
 							return "FailedBattle"
-			# if unit == "Camel":
-			# 	if self.clMessageCheckImage():
-			# 		continue
+			if unit == "Camel":
+				if self.clMessageCheckImage():
+					continue
 			if sb == 'NOBOTS':
 				return "NOBOTS"
 		print("GOLD FARM METHOD FAILED")
@@ -2780,7 +2792,7 @@ class MainClass:
 					self.moveOnMap(coors[0] + deltaX, coors[1] + deltaY)
 		self.send_message("  Route completion Successful", self.token2)
 		return True
-	def followTheRoutePumpkin(self, route, unit = "Dragon", collect = False, exactCoors = (-1, -1), zero = False):
+	def followTheRoutePumpkin(self, route, unit = "Dragon", collect = False, exactCoors = (-1, -1), side = "2", zero = False, bats = True):
 		self.send_message("Move along the route", self.token2)
 		point = 0
 		if exactCoors[0] == 0 and exactCoors[1] == 0:
@@ -2806,17 +2818,21 @@ class MainClass:
 						if self.zeroExp():
 							return False
 				if collect:
-					for k in range(1):
-						fg = self.farmingGold(unit = unit, magic = False, magnetAngle = "3")
+					for k in range(3):
+						if bats and k > 0:
+							break
+						fg = self.farmingGold(unit = unit, magic = False, magnetAngle = side)
 						if fg == "NOBOTS":
-							print("    NOBOTS")
+							if not bats:
+								break
 						elif fg == "FailedBattle":
 							return False
 						else:
-							if not self.moveOnMap(coors[0] + deltaX, coors[1] + deltaY, npcAttack = False):
-								print(f"    Can't move in coordinates {coors[0] + deltaX} {coors[1] + deltaY}")
-								self.send_message("    Route completion FAILED | FALSE", self.token2)
-								return False
+							if bats:
+								if not self.moveOnMap(coors[0] + deltaX, coors[1] + deltaY, npcAttack = False):
+									print(f"    Can't move in coordinates {coors[0] + deltaX} {coors[1] + deltaY}")
+									self.send_message("    Route completion FAILED | FALSE", self.token2)
+									return False
 		self.send_message("  Route completion Successful", self.token2)
 		return True
 	def orderTeleport(self, town):
@@ -2957,8 +2973,20 @@ class MainClass:
 					print(f"      Bag is not full - {fullness}")
 					return "NOTFULL"
 			else:
-				print(f'  log FAILED {keyPhrase} not found within range [{self.endingIndex} - end]')
-				return "FALSE"
+				position = file.rfind("Çàðåçåðâèðîâàííûé îïûò: ", self.endingIndex)
+				if position != -1:
+					print(f'  LOG 1 SUCCES {keyPhrase} found on position {position}')
+					fullness = file[position + len(keyPhrase) : position + len(keyPhrase) + 2]
+					print(f"    Fullness is {fullness}")
+					if int(fullness) >= fullBag:
+						print(f"      The bag is overflowing | Log check is successful")
+						return "FULL"
+					else:
+						print(f"      Bag is not full - {fullness}")
+						return "NOTFULL"
+				else:
+					print(f'  log FAILED {keyPhrase} not found within range [{self.endingIndex} - end]')
+					return "FALSE"
 		if econonyOpen():
 			lFH = logFullnessHandler()
 			if lFH == 'FULL':

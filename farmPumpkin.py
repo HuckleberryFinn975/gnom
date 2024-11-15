@@ -5,8 +5,8 @@ import random
 from ahk import AHK
 
 MainClass.moveTerminal()
-race = input("\t1 - Elf\n\t2 - Orc\n\t3 - Dead\n\t4 - Human\n\t5 - Dwarf\nSellect race: ")
-location = input("\t  1 - Bats\n\t  2 - Pumpkins\nSellect location: ")
+race = input("\t1 - Elf\n\t2 - Orc\n\t3 - Dead\n\t4 - Human\n\t5 - Dwarf\nSelect race: ")
+location = input("\t  1 - Bats\n\t  2 - Pumpkins\nSelect location: ")
 ch = MainClass(race, 0)
 ch.savePID()
 routes = {
@@ -16,11 +16,11 @@ routes = {
     "routePumpkin1": ((2, 22), (11, 15), (18, 10), (25, 12), (27, 10), (30, 14), (39, 13), (43, 22), (42, 30), (38, 37), (34, 33), (26, 39), (21, 36), (19, 37), (17, 39), (14, 35), (7, 35), (2, 31)),
     "routePumpkin2": ((7, 31), (14, 34), (21, 35), (25, 41), (27, 34), (32, 36), (35, 32), (36, 39), (40, 36), (43, 29), (40, 21), (39, 14), (34, 17), (30, 14), (27, 17), (23, 12), (18, 15), (12, 12), (8, 18), (4, 26))
 }
-zero = False
+zero, bats = False, True
 currentRoute = random.choice(("routeAoFLeft", "routeAoFRight"))
 if location == "2":
-    currentRoute, zero = random.choice(("routePumpkin1", "routePumpkin2")), True
-lap, side, fails = 0, "1", 0
+    currentRoute, zero, bats = random.choice(("routePumpkin1", "routePumpkin2")), True, False
+lap, side, fails = 0, "2", 0
 
 ch.relogin()
 process = subprocess.Popen(['py', 'walkClanMessages.py'])
@@ -32,9 +32,9 @@ if ch.checkInTheCity():
         if location == "2":
             ch.followTheRoutePumpkin(routes["routeAoFCloud"])
             ch.crossToNextMap(49, 29)
-            ch.startMove(firstKey='left')
+            ch.startMove()
         while True:
-            ftr = ch.followTheRoutePumpkin(routes[currentRoute], collect = True, zero=zero)
+            ftr = ch.followTheRoutePumpkin(routes[currentRoute], collect = True, zero=zero, side = side, bats = bats)
             if ftr:
                 fails, lap = 0, lap + 1
                 ch.send_message(f"LAP {lap}", token=ch.token2)
@@ -64,7 +64,7 @@ if ch.checkInTheCity():
                 print("More 3 Fails in the row. Break")
                 break
             if lap > 0 and lap % 50 == 0:
-                ch.send_message("Change the route", ch.token2)
+                ch.send_message("Change the route and side", ch.token2)
                 if currentRoute == "routeAoFLeft":
                     currentRoute = "routeAoFRight"
                 elif currentRoute == "routeAoFRight":
@@ -73,6 +73,13 @@ if ch.checkInTheCity():
                     currentRoute = "routePumpkin2"
                 elif currentRoute == "routePumpkin2":
                     currentRoute = "routePumpkin1"
+                if side == '2':
+                    side = '3'
+                elif side == '3':
+                    side = '2' 
+            if ch.noNPC >= 100:
+                print("NPCs are missing. More 100 Attempts")
+                break
     else:
         process.terminate()
         print("ANOTHER CITY")
