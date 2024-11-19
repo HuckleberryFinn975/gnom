@@ -83,15 +83,19 @@ if ch.checkInTheCity():
                 elif farmGold == "NOBOTS":
                     fails += 1
                     if point == 'left':
-                        ch.moveOnMap(21, 10, npcAttack = False)
+                        ch.moveOnMap(20 + random.randint(-1, 1), 10, npcAttack = False)
                         point = 'right'
                     elif point == 'right':
-                        ch.moveOnMap(13, 5, npcAttack = False)
+                        ch.moveOnMap(13 +  random.randint(-1, 1), 5, npcAttack = False)
                         point = 'left'
                     sleep(.5)
                 elif farmGold == "FailedBattle":
                     fails += 1 
                     lap += 1
+                if time.time() > farmStartTime + timeUntilRestart:
+                    ch.send_message("More than 15 minutes without restart", ch.token2)
+                    ch.relogin()
+                    farmStartTime = time.time()
                 if fails >= 25:
                     ch.send_message("MORE 25 FAILS | sleep 20 sec", ch.token1, timeOut = ch.to1)
                     sleep(20)

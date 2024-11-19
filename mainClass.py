@@ -23,7 +23,7 @@ data = {"titles": {"1": "ELF","2": "ORC", "3": "DEAD", "4": "HUMAN", "5": "DWARF
 equipmentCoors = {"helmet": 195, "amulet": (255, 420), "weapon": (470, 530), "armour": 585, "boots": 630, "flag": 690}
 
 class MainClass:
-	farm12, battleNumber, noNPC = 1, 0, 0
+	farm12, battleNumber, noNPC, npcCount = 1, 0, 0, 1
 	joinedBots, startUnit = 0, "Griffin"
 	lastBot, endingIndex, botListLenght = (0,0), 0, 0
 	dissed = False
@@ -2150,7 +2150,7 @@ class MainClass:
 		else:
 			print("  dont see boots")
 			return 'NOBOTS'
-	def searchBotFarm(self, enemy = "Dragon", side = "1"):
+	def searchBotFarm(self, enemy = "Dragon", side = "1", region=(0, 0, 1200, 1200)):
 		if side == "1":
 			window_center_x, window_center_y = 1280, 0
 		elif side == "2":
@@ -2162,13 +2162,14 @@ class MainClass:
 		def distance(point1, point2):
 			return math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
 		print("Looking for bots...")
-		bots = pyautogui.locateAllOnScreen(f"img/collection/part{enemy}.png", region=(0, 0, 1200, 1200), confidence=.9)
+		bots = pyautogui.locateAllOnScreen(f"img/collection/part{enemy}.png", region=region, confidence=.9)
 		botList = list(bots)
 		if botList:
 			print("  FOUND BOTs")
 			self.noNPC = 0
 			if len(botList) >= 2:
 				print('    See >= 2 bots')
+				self.npcCount = 2
 				sorted_objects = sorted(botList, key=lambda obj: distance((window_center_x, window_center_y), obj))
 				closest_objects = sorted_objects[:2]
 				if self.farm12 == 1:
@@ -2180,6 +2181,7 @@ class MainClass:
 					click(closest_objects[1])
 					self.farm12 = 1
 			elif len(botList) == 1:
+				self.npcCount = 1
 				print('    1 bot')
 				click(botList[0])
 				self.lastBot = botList[0]
@@ -2475,10 +2477,10 @@ class MainClass:
 		self.send_message("    TELEPORTATION FAILED | FALSE", self.token2)
 		self.rightSoft()
 		return False
-	def farmingGold(self, unit = "Camel", magic = True, magnetAngle = "1"):
+	def farmingGold(self, unit = "Camel", magic = True, magnetAngle = "1", region=(0, 0, 1200, 1200)):
 		print("Run Farm method")
 		for _ in range(3):
-			sb = self.searchBotFarm(enemy = unit, side = magnetAngle)
+			sb = self.searchBotFarm(enemy = unit, side = magnetAngle, region = region)
 			if sb == 'NICE':
 				for _ in range(3):    
 					if self.logHandler("client -> server: 109 wait for: 24"):
@@ -2827,8 +2829,66 @@ class MainClass:
 								break
 						elif fg == "FailedBattle":
 							return False
+						elif fg == "Battle" or fg == "KILLED":
+							if self.npcCount == 1:
+								print("    Only 1 NPC. break")
+								break
 						else:
 							if bats:
+								if not self.moveOnMap(coors[0] + deltaX, coors[1] + deltaY, npcAttack = False):
+									print(f"    Can't move in coordinates {coors[0] + deltaX} {coors[1] + deltaY}")
+									self.send_message("    Route completion FAILED | FALSE", self.token2)
+									return False
+		self.send_message("  Route completion Successful", self.token2)
+		return True
+	def followTheRouteBats(self, route, unit = "Dragon", collect = False, exactCoors = (-1, -1), side = "2", zero = False, bats = True):
+		self.send_message("Move along the route (Bats)", self.token2)
+		point = 0
+		for coors in route:
+			if exactCoors[0] == 0 and exactCoors[1] == 0:
+				deltaX, deltaY = 0, 0    
+			else:
+				deltaX, deltaY = random.randint(-1, 1), random.randint(-1, 1)
+			print(f"  Delta X, Delta Y - {deltaX}, {deltaY}")
+			if coors[0] == exactCoors[0] and coors[1] == exactCoors[1]:
+				print("    EXACT COORS MATCH")
+				if deltaX != 0:
+					print(f"      DeltaX = {deltaX} | DeltaY is 0")
+					deltaY = 0
+			if not self.moveOnMap(coors[0] + deltaX, coors[1] + deltaY, npcAttack = False):
+				print(f"    Can't move in coordinates {coors[0] + deltaX} {coors[1] + deltaY}")
+				self.send_message("    Route completion FAILED | FALSE", self.token2)
+				return False
+			else:
+				point += 1
+				print(f"    Point {point} ({coors[0]}:{coors[1]}) has been reached")
+				if zero:
+					if self.battleNumber > 0 and self.battleNumber % 3 == 0:
+						if self.zeroExp():
+							return False
+				if collect:
+					for k in range(2):
+						if coors[2] == 'noFarm':
+							break
+						fg = self.farmingGold(unit = unit, magic = False, magnetAngle = side, region=coors[2])
+						if fg == "NOBOTS":
+							if not bats:
+								break
+						elif fg == "Battle":
+							break
+						elif fg == "FailedBattle":
+							return False
+						else:
+							if bats:
+								if exactCoors[0] == 0 and exactCoors[1] == 0:
+									deltaX, deltaY = 0, 0    
+								else:
+									deltaX, deltaY = random.randint(-1, 1), random.randint(-1, 1)
+								if coors[0] == exactCoors[0] and coors[1] == exactCoors[1]:
+									print("    EXACT COORS MATCH")
+									if deltaX != 0:
+										print(f"      DeltaX = {deltaX} | DeltaY is 0")
+										deltaY = 0
 								if not self.moveOnMap(coors[0] + deltaX, coors[1] + deltaY, npcAttack = False):
 									print(f"    Can't move in coordinates {coors[0] + deltaX} {coors[1] + deltaY}")
 									self.send_message("    Route completion FAILED | FALSE", self.token2)

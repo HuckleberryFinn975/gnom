@@ -10,12 +10,33 @@ location = input("\t  1 - Bats\n\t  2 - Pumpkins\nSelect location: ")
 ch = MainClass(race, 0)
 ch.savePID()
 routes = {
-    "routeAoFLeft": ((18, 31), (22, 17), (22, 18), (22, 19), (25, 28), (26, 38), (23, 47), (11, 45), (2, 36), (5, 25), (6, 13), (17, 6), (28, 10), (40, 7), (42, 15), (47, 18), (46, 28), (44, 35), (47, 45), (36, 43), (26, 36)),
-    "routeAoFRight": ((25, 27), (25, 22), (22, 17), (17, 21), (17, 34), (28, 44), (38, 48), (47, 38), (43, 28), (46, 17), (46, 4), (35, 5), (24, 7), (12, 9), (8, 2), (5, 7), (2, 18), (3, 28), (2, 36), (14, 46), (19, 39)),
+    "routeAoFLeft": (
+        (14, 45, (0, 0, 1200, 1200)),
+        (3, 34, (0, 0, 600, 600)),
+        (3, 25, "noFarm"),
+        (1, 19, (0, 0, 600, 700)),
+        (4, 11, "noFarm"),
+        (11, 5, (0, 0, 800, 450)),
+        (22, 7, (200, 0, 600, 750)),
+        (28, 4, (200, 0, 600, 500)), 
+        (38, 8, (75, 0, 800, 700)),
+        (43, 8, (0, 0, 900, 700)),
+        (47, 13, (500, 0, 500, 700)),
+        (45, 20, (0, 0, 1200, 1200)),
+        (47, 25, (0, 0, 1200, 1200)),
+        (46, 30, (500, 100, 500, 700)),
+        (46, 42, (350, 350, 650, 650)),
+        (33, 43, (100, 200, 650, 600)),
+        (27, 34, "noFarm"),
+        (26, 22, (200, 0, 700, 500)),
+        (17, 21, (200, 50, 550, 550)),
+        (18, 26, "noFarm"),
+        (17, 35, "noFarm")),
     "routeAoFCloud": ((23, 45), (35, 48), (47, 47), (47, 36)),
     "routePumpkin1": ((2, 22), (11, 15), (18, 10), (25, 12), (27, 10), (30, 14), (39, 13), (43, 22), (42, 30), (38, 37), (34, 33), (26, 39), (21, 36), (19, 37), (17, 39), (14, 35), (7, 35), (2, 31)),
     "routePumpkin2": ((7, 31), (14, 34), (21, 35), (25, 41), (27, 34), (32, 36), (35, 32), (36, 39), (40, 36), (43, 29), (40, 21), (39, 14), (34, 17), (30, 14), (27, 17), (23, 12), (18, 15), (12, 12), (8, 18), (4, 26))
 }
+routes["routeAoFRight"] = list(reversed(routes["routeAoFLeft"]))
 zero, bats = False, True
 currentRoute = random.choice(("routeAoFLeft", "routeAoFRight"))
 if location == "2":
@@ -34,7 +55,10 @@ if ch.checkInTheCity():
             ch.crossToNextMap(49, 29)
             ch.startMove()
         while True:
-            ftr = ch.followTheRoutePumpkin(routes[currentRoute], collect = True, zero=zero, side = side, bats = bats)
+            if location == "1":
+                ftr = ch.followTheRouteBats(routes[currentRoute], collect = True, zero=zero, side = side, bats = bats)
+            elif location == "2":
+                ftr = ch.followTheRoutePumpkin(routes[currentRoute], collect = True, zero=zero, side = side, bats = bats)
             if ftr:
                 fails, lap = 0, lap + 1
                 ch.send_message(f"LAP {lap}", token=ch.token2)
