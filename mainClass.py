@@ -2876,6 +2876,10 @@ class MainClass:
 								break
 						elif fg == "Battle":
 							break
+						elif fg == "KILLED":
+							if self.npcCount == 1:
+								print("    Only 1 NPC. break")
+								break
 						elif fg == "FailedBattle":
 							return False
 						else:
