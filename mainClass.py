@@ -2820,7 +2820,7 @@ class MainClass:
 						if self.zeroExp():
 							return False
 				if collect:
-					for k in range(3):
+					for k in range(2):
 						if bats and k > 0:
 							break
 						fg = self.farmingGold(unit = unit, magic = False, magnetAngle = side)
