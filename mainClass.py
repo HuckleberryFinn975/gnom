@@ -3061,7 +3061,7 @@ class MainClass:
 				return 'FALSE' 
 		else:
 			return "FALSE"
-	def emptyBackpack(self):
+	def emptyBackpack(self, bagSize = 30):
 		def gotoMarkt():
 			print("Trying to open the Markt")
 			for _ in range(3):
@@ -3101,7 +3101,7 @@ class MainClass:
 		def sellAll():
 			# press('right')
 			sleep(.2)
-			for _ in range(50):
+			for _ in range(bagSize + 5):
 				press(['enter', 'right', 'enter', 'right'])
 			press('enter')
 			for _ in range(3):

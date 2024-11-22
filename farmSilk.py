@@ -16,11 +16,11 @@ else:
     bagSize = 35 
 ch = MainClass(race, 0)
 ch.savePID()
-point, timeUntilRestart = "right", 900
+point, timeUntilRestart = "right", 600
 routeTree1A = (30, 3), (19, 4), (13, 4)
 routeTree1B = (29, 8), (17, 7), (12, 2)
 routeXintaRight = (41, 31), (29, 32), (34, 23), (32, 12)
-routeXintaRight2 = (32, 12), (34, 23), (26, 32), (34, 23), (32, 12)
+routeXintaRight2 = (32, 12), (34, 23)
 routeXintaLeft = (41, 31), (29, 32), (19, 27), (18, 20), (16, 12)
 pointsXL = (21, 10), (21, 11), (21, 12), (20, 10), (20, 11), (20, 12)
 ch.relogin()
@@ -32,21 +32,21 @@ if ch.checkInTheCity():
         if ch.defineTheCityImage('TreeAbode'):
             def checkBagAndGo(notCheck = False):
                 if notCheck:
-                    ch.emptyBackpack()
+                    ch.emptyBackpack(bagSize = bagSize)
                 else:
                     bgfull = ch.bagFullness(bagSize = bagSize)
                     if bgfull == 'FULL':
                         ch.outOfCharacter()
-                        ch.emptyBackpack()
+                        ch.emptyBackpack(bagSize = bagSize)
                     elif bgfull == 'NOTFULL':
                         ch.outOfCharacter()
                 ch.leaveTheCity()
                 ch.startMove()
                 randRoute = random.randint(1, 2)
                 if randRoute == 1:
-                    ch.followTheRoutePumpkin(routeTree1A, unit = "Camel", collect=True)
+                    ch.followTheRoutePumpkin(routeTree1A, unit = "Camel", collect=False)
                 elif randRoute == 2:
-                    ch.followTheRoutePumpkin(routeTree1B, unit = "Camel", collect=True, exactCoors=(17, 7))
+                    ch.followTheRoutePumpkin(routeTree1B, unit = "Camel", collect=False, exactCoors=(17, 7))
             checkBagAndGo()
             lap, side, fails = 0, "1", 0
             while True:
@@ -82,23 +82,23 @@ if ch.checkInTheCity():
                     lap += 1
                 elif farmGold == "NOBOTS":
                     fails += 1
-                    if point == 'left':
-                        ch.moveOnMap(20 + random.randint(-1, 1), 10, npcAttack = False)
-                        point = 'right'
-                    elif point == 'right':
-                        ch.moveOnMap(13 +  random.randint(-1, 1), 5, npcAttack = False)
-                        point = 'left'
-                    sleep(.5)
+                    sleep(1)
                 elif farmGold == "FailedBattle":
                     fails += 1 
                     lap += 1
+                if lap > 0 and lap % 5 == 0:
+                    ch.moveOnMap(20 + random.randint(-1, 1), 10, npcAttack = False)
+                    sleep(.5)
+                    farmGold = ch.farmingGold(magic = False, magnetAngle = side) 
+                    ch.moveOnMap(13 +  random.randint(-1, 1), 5, npcAttack = False)
+                    sleep(.5)
                 if time.time() > farmStartTime + timeUntilRestart:
-                    ch.send_message("More than 15 minutes without restart", ch.token2)
+                    ch.send_message("More than 10 minutes without restart", ch.token2)
                     ch.relogin()
                     farmStartTime = time.time()
-                if fails >= 25:
-                    ch.send_message("MORE 25 FAILS | sleep 20 sec", ch.token1, timeOut = ch.to1)
-                    sleep(20)
+                if fails >= 15:
+                    ch.send_message("MORE 15 FAILS | sleep 60 sec", ch.token1, timeOut = ch.to1)
+                    sleep(60)
                     process.terminate()
                     ch.relogin()
                     farmStartTime = time.time()
@@ -115,12 +115,12 @@ if ch.checkInTheCity():
         if ch.defineTheCityImage('Xinta'):
             def checkBagAndGo(notCheck = False):
                 if notCheck:
-                    ch.emptyBackpack()
+                    ch.emptyBackpack(bagSize = bagSize)
                 else:
                     bgfull = ch.bagFullness(bagSize = bagSize)
                     if bgfull == 'FULL':
                         ch.outOfCharacter()
-                        ch.emptyBackpack()
+                        ch.emptyBackpack(bagSize = bagSize)
                     elif bgfull == 'NOTFULL':
                         ch.outOfCharacter()
                 ch.leaveTheCity()
@@ -170,17 +170,21 @@ if ch.checkInTheCity():
                     lap += 1
                 if lap > 0 and lap % 8 == 0:
                     if location == '2':
-                        ch.followTheRoutePumpkin(routeXintaRight2, unit = "Camel", collect=True)
+                        ch.followTheRoutePumpkin(routeXintaRight2)
+                        ch.farmingGold(magic=False)
+                        ch.moveOnMap(26, 32, npcAttack = False)
+                        ch.farmingGold(magic=False)
+                        ch.followTheRoutePumpkin(list(reversed(routeXintaRight2)))
                     else:
                         curPoint = random.choice(pointsXL)
                         ch.moveOnMap(curPoint[0], curPoint[1], npcAttack = False)
                 if time.time() > farmStartTime + timeUntilRestart:
-                    ch.send_message("More than 15 minutes without restart", ch.token2)
+                    ch.send_message("More than 10 minutes without restart", ch.token2)
                     ch.relogin()
                     farmStartTime = time.time()
-                if fails >= 25:
-                    ch.send_message("MORE 25 FAILS | sleep 20 sec", ch.token1, timeOut = ch.to1)
-                    sleep(20)
+                if fails >= 15:
+                    ch.send_message("MORE 15 FAILS | sleep 60 sec", ch.token1, timeOut = ch.to1)
+                    sleep(60)
                     process.terminate()
                     ch.relogin()
                     farmStartTime = time.time()
