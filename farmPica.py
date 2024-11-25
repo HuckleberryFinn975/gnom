@@ -94,8 +94,8 @@ if ch.checkInTheCity():
                 ch.send_message("More than 10 minutes without restart", ch.token2)
                 ch.relogin()
                 farmStartTime = time.time()
-            if fails >= 15:
-                ch.send_message("MORE 15 FAILS | sleep 60 sec", ch.token1, timeOut = ch.to1)
+            if fails >= 10:
+                ch.send_message("MORE 10 FAILS | sleep 60 sec", ch.token1, timeOut = ch.to1)
                 sleep(60)
                 process.terminate()
                 ch.relogin()
@@ -105,6 +105,9 @@ if ch.checkInTheCity():
                 if ch.checkInTheCity():
                     if ch.defineTheCityImage('Picathron'):
                         checkBagAndGo()
+            if ch.noNPC >= 100:
+                print("NPCs are missing. More 100 Attempts")
+                break
             sleep(.2)
     else:
         process.terminate()

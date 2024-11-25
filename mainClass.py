@@ -1816,8 +1816,8 @@ class MainClass:
 									while time.time() <= (timeBefor + 1 + random.randint(1,2)/10):
 										sleep(.05)
 							timeBefor = time.time()
-							click(enemyList[0])
 							click(enemyList[1])
+							click(enemyList[0])
 							pyautogui.moveTo(100, 100)
 							moveNumber += 1
 							enemyList = list(enemies)
@@ -1896,10 +1896,10 @@ class MainClass:
 				continue
 		print("startMove FAILED | FALSE")
 		return False
-	def moveOnMap(self, x, y, npcAttack = True):
+	def moveOnMap(self, x, y, npcAttack = True, iters = 3):
 		print("Try to move on the map")
 		attempts = 0
-		for _ in range(3):
+		for _ in range(iters):
 			currentCoors = self.logWalkHandler()
 			if currentCoors:
 				if len(currentCoors) >= 2 and currentCoors[0].isdigit() and currentCoors[1].isdigit():

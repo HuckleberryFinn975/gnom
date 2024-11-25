@@ -3,6 +3,7 @@ import subprocess
 import time
 from time import sleep
 import random
+from pyautogui import press
 from ahk import AHK
 
 MainClass.moveTerminal()
@@ -86,18 +87,22 @@ if ch.checkInTheCity():
                 elif farmGold == "FailedBattle":
                     fails += 1 
                     lap += 1
-                if lap > 0 and lap % 5 == 0:
-                    ch.moveOnMap(20 + random.randint(-1, 1), 10, npcAttack = False)
+                if lap > 0 and lap % 6 == 0:
                     sleep(.5)
-                    farmGold = ch.farmingGold(magic = False, magnetAngle = side) 
-                    ch.moveOnMap(13 +  random.randint(-1, 1), 5, npcAttack = False)
+                    press('right', presses = 20)
+                    farmGold = ch.farmingGold(magic = False, magnetAngle = side)
+                    ch.toCenter()
+                    for _ in range(3):
+                        if ch.moveOnMap(14 +  random.randint(-1, 1), 10, npcAttack = False, iters = 1):
+                            break
+                    press('left', presses = 20)
                     sleep(.5)
                 if time.time() > farmStartTime + timeUntilRestart:
                     ch.send_message("More than 10 minutes without restart", ch.token2)
                     ch.relogin()
                     farmStartTime = time.time()
-                if fails >= 15:
-                    ch.send_message("MORE 15 FAILS | sleep 60 sec", ch.token1, timeOut = ch.to1)
+                if fails >= 10:
+                    ch.send_message("MORE 10 FAILS | sleep 60 sec", ch.token1, timeOut = ch.to1)
                     sleep(60)
                     process.terminate()
                     ch.relogin()
@@ -107,6 +112,9 @@ if ch.checkInTheCity():
                     if ch.checkInTheCity():
                         if ch.defineTheCityImage('TreeAbode'):
                             checkBagAndGo()
+                if ch.noNPC >= 100:
+                    print("NPCs are missing. More 100 Attempts")
+                    break
                 sleep(.2)
         else:
             process.terminate()
@@ -182,8 +190,8 @@ if ch.checkInTheCity():
                     ch.send_message("More than 10 minutes without restart", ch.token2)
                     ch.relogin()
                     farmStartTime = time.time()
-                if fails >= 15:
-                    ch.send_message("MORE 15 FAILS | sleep 60 sec", ch.token1, timeOut = ch.to1)
+                if fails >= 10:
+                    ch.send_message("MORE 10 FAILS | sleep 60 sec", ch.token1, timeOut = ch.to1)
                     sleep(60)
                     process.terminate()
                     ch.relogin()
@@ -193,6 +201,9 @@ if ch.checkInTheCity():
                     if ch.checkInTheCity():
                         if ch.defineTheCityImage('Xinta'):
                             checkBagAndGo()
+                if ch.noNPC >= 100:
+                    print("NPCs are missing. More 100 Attempts")
+                    break
                 sleep(.2)
         else:
             process.terminate()
