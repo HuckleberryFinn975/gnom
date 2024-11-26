@@ -20,9 +20,9 @@ ch.savePID()
 point, timeUntilRestart = "right", 600
 routeTree1A = (30, 3), (19, 4), (13, 4)
 routeTree1B = (29, 8), (17, 7), (12, 2)
-routeXintaRight = (41, 31), (29, 32), (34, 23), (32, 12)
+routeXintaRight = (41, 31), (29, 32), (29, 32), (34, 23), (32, 12)
 routeXintaRight2 = (32, 12), (34, 23)
-routeXintaLeft = (41, 31), (29, 32), (19, 27), (18, 20), (16, 12)
+routeXintaLeft = (41, 31), (29, 32), (29, 32), (19, 27), (18, 20), (16, 12)
 pointsXL = (21, 10), (21, 11), (21, 12), (20, 10), (20, 11), (20, 12)
 ch.relogin()
 farmStartTime = time.time()
@@ -99,10 +99,16 @@ if ch.checkInTheCity():
                     sleep(.5)
                 if time.time() > farmStartTime + timeUntilRestart:
                     ch.send_message("More than 10 minutes without restart", ch.token2)
+                    process.terminate()
                     ch.relogin()
                     farmStartTime = time.time()
+                    process = subprocess.Popen(['py', 'walkClanMessages.py'])
+                    ch.activate()
+                    if ch.checkInTheCity():
+                        if ch.defineTheCityImage('TreeAbode'):
+                            checkBagAndGo()
                 if fails >= 10:
-                    ch.send_message("MORE 10 FAILS | sleep 60 sec", ch.token1, timeOut = ch.to1)
+                    ch.send_message("MORE 10 FAILS | sleep 60 sec", ch.token2, timeOut = ch.to1)
                     sleep(60)
                     process.terminate()
                     ch.relogin()
@@ -182,16 +188,23 @@ if ch.checkInTheCity():
                         ch.farmingGold(magic=False)
                         ch.moveOnMap(26, 32, npcAttack = False)
                         ch.farmingGold(magic=False)
+                        ch.moveOnMap(26, 32, npcAttack = False)
                         ch.followTheRoutePumpkin(list(reversed(routeXintaRight2)))
                     else:
                         curPoint = random.choice(pointsXL)
                         ch.moveOnMap(curPoint[0], curPoint[1], npcAttack = False)
                 if time.time() > farmStartTime + timeUntilRestart:
                     ch.send_message("More than 10 minutes without restart", ch.token2)
+                    process.terminate()
                     ch.relogin()
                     farmStartTime = time.time()
+                    process = subprocess.Popen(['py', 'walkClanMessages.py'])
+                    ch.activate()
+                    if ch.checkInTheCity():
+                        if ch.defineTheCityImage('Xinta'):
+                            checkBagAndGo()
                 if fails >= 10:
-                    ch.send_message("MORE 10 FAILS | sleep 60 sec", ch.token1, timeOut = ch.to1)
+                    ch.send_message("MORE 10 FAILS | sleep 60 sec", ch.token2, timeOut = ch.to1)
                     sleep(60)
                     process.terminate()
                     ch.relogin()
