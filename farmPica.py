@@ -15,7 +15,7 @@ else:
     bagSize = 35 
 ch = MainClass(race, 0)
 ch.savePID()
-point, timeUntilRestart = "right", 600
+point, timeUntilRestart, bagChecked = "right", 600, False
 
 routePica1 = (18, 17), (16, 7)
 routePica2 = (23, 21), (26, 17)
@@ -55,45 +55,58 @@ if ch.checkInTheCity():
                     print("SWITCH SIDE ON 1")
                     side = '1'
             if lap > 0 and lap % 7 == 0:
-                bgfull = ch.bagFullness(bagSize = bagSize)
-                if bgfull == 'FULL':
-                    process.terminate()
-                    ch.relogin()
-                    farmStartTime = time.time()
-                    process = subprocess.Popen(['py', 'walkClanMessages.py'])
-                    ch.activate()
-                    if ch.checkInTheCity():
-                        if ch.defineTheCityImage('Picathron'):
-                            checkBagAndGo(notCheck = True)
+                if not bagChecked:
+                    bgfull = ch.bagFullness(bagSize = bagSize)
+                    if bgfull == 'FULL':
+                        bagChecked = False
+                        process.terminate()
+                        ch.relogin()
+                        farmStartTime = time.time()
+                        process = subprocess.Popen(['py', 'walkClanMessages.py'])
+                        ch.activate()
+                        if ch.checkInTheCity():
+                            if ch.defineTheCityImage('Picathron'):
+                                checkBagAndGo(notCheck = True)
+                            else:
+                                process.terminate()
+                                print("ANOTHER CITY")
+                                fails += 1
                         else:
                             process.terminate()
-                            print("ANOTHER CITY")
+                            print("NOT IN CITY")
                             fails += 1
-                    else:
-                        process.terminate()
-                        print("NOT IN CITY")
-                        fails += 1
-                elif bgfull == 'NOTFULL':
-                    ch.outOfCharacterMap()
+                    elif bgfull == 'NOTFULL':
+                        ch.outOfCharacterMap()
+                        bagChecked = True
+                    elif bgfull == 'FALSE':
+                        ch.outOfCharacterMap()
             farmGold = ch.farmingGold(magic = False, magnetAngle = side) 
             if farmGold == "Battle":
                 lap += 1
                 fails = 0
+                bagChecked = False
             elif farmGold == "KILLED":
                 fails = 0
             elif farmGold == "FAILED":
                 fails += 1 
-                lap += 1
             elif farmGold == "NOBOTS":
                 fails += 1
                 sleep(1)
             elif farmGold == "FailedBattle":
                 fails += 1 
                 lap += 1
+                bagChecked = False
             if time.time() > farmStartTime + timeUntilRestart:
                 ch.send_message("More than 10 minutes without restart", ch.token2)
+                process.terminate()
                 ch.relogin()
                 farmStartTime = time.time()
+                process = subprocess.Popen(['py', 'walkClanMessages.py'])
+                ch.activate()
+                if ch.checkInTheCity():
+                    if ch.defineTheCityImage('Picathron'):
+                        checkBagAndGo()
+                        bagChecked = False
             if fails >= 10:
                 ch.send_message("MORE 10 FAILS | sleep 60 sec", ch.token1, timeOut = ch.to1)
                 sleep(60)
@@ -105,6 +118,7 @@ if ch.checkInTheCity():
                 if ch.checkInTheCity():
                     if ch.defineTheCityImage('Picathron'):
                         checkBagAndGo()
+                        bagChecked = False
             if ch.noNPC >= 100:
                 print("NPCs are missing. More 100 Attempts")
                 break
@@ -116,7 +130,7 @@ else:
     process.terminate()
     print("NOT IN CITY")
 
-ch.send_message("Farm Silk FINISH", ch.token1, timeOut = ch.to1)
+ch.send_message("Farm PICA FINISH", ch.token1, timeOut = ch.to1)
 process.terminate()
 
 

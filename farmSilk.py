@@ -39,7 +39,7 @@ if ch.checkInTheCity():
                     if bgfull == 'FULL':
                         ch.outOfCharacter()
                         ch.emptyBackpack(bagSize = bagSize)
-                    elif bgfull == 'NOTFULL':
+                    elif bgfull == 'NOTFULL' or  bgfull == 'FALSE':
                         ch.outOfCharacter()
                 ch.leaveTheCity()
                 ch.startMove()
@@ -52,41 +52,49 @@ if ch.checkInTheCity():
             lap, side, fails = 0, "1", 0
             while True:
                 if lap > 0 and lap % 7 == 0:
-                    bgfull = ch.bagFullness(bagSize = bagSize)
-                    if bgfull == 'FULL':
-                        process.terminate()
-                        ch.relogin()
-                        farmStartTime = time.time()
-                        process = subprocess.Popen(['py', 'walkClanMessages.py'])
-                        ch.activate()
-                        if ch.checkInTheCity():
-                            if ch.defineTheCityImage('TreeAbode'):
-                                checkBagAndGo(notCheck = True)
+                    if not bagChecked:
+                        bgfull = ch.bagFullness(bagSize = bagSize)
+                        if bgfull == 'FULL':
+                            bagChecked = False
+                            process.terminate()
+                            ch.relogin()
+                            farmStartTime = time.time()
+                            process = subprocess.Popen(['py', 'walkClanMessages.py'])
+                            ch.activate()
+                            if ch.checkInTheCity():
+                                if ch.defineTheCityImage('TreeAbode'):
+                                    checkBagAndGo(notCheck = True)
+                                else:
+                                    process.terminate()
+                                    print("ANOTHER CITY")
+                                    fails += 1
                             else:
                                 process.terminate()
-                                print("ANOTHER CITY")
+                                print("NOT IN CITY")
                                 fails += 1
-                        else:
-                            process.terminate()
-                            print("NOT IN CITY")
-                            fails += 1
-                    elif bgfull == 'NOTFULL':
-                        ch.outOfCharacterMap()
+                        elif bgfull == 'NOTFULL':
+                            ch.outOfCharacterMap()
+                            bagChecked = False
+                        elif bgfull == 'FALSE':
+                            ch.outOfCharacterMap()
                 farmGold = ch.farmingGold(magic = False, magnetAngle = side) 
                 if farmGold == "Battle":
                     lap += 1
                     fails = 0
+                    bagChecked = False
                 elif farmGold == "KILLED":
                     fails = 0
                 elif farmGold == "FAILED":
                     fails += 1 
-                    lap += 1
                 elif farmGold == "NOBOTS":
                     fails += 1
                     sleep(1)
+                    if ch.noNPC > 0 and ch.noNPC % 3 == 0:
+                        press('left', presses = 18)
                 elif farmGold == "FailedBattle":
                     fails += 1 
                     lap += 1
+                    bagChecked = False
                 if lap > 0 and lap % 6 == 0:
                     sleep(.5)
                     press('right', presses = 20)
@@ -107,6 +115,7 @@ if ch.checkInTheCity():
                     if ch.checkInTheCity():
                         if ch.defineTheCityImage('TreeAbode'):
                             checkBagAndGo()
+                            bagChecked = False
                 if fails >= 10:
                     ch.send_message("MORE 10 FAILS | sleep 60 sec", ch.token2, timeOut = ch.to1)
                     sleep(60)
@@ -118,6 +127,7 @@ if ch.checkInTheCity():
                     if ch.checkInTheCity():
                         if ch.defineTheCityImage('TreeAbode'):
                             checkBagAndGo()
+                            bagChecked = False
                 if ch.noNPC >= 100:
                     print("NPCs are missing. More 100 Attempts")
                     break
@@ -135,7 +145,7 @@ if ch.checkInTheCity():
                     if bgfull == 'FULL':
                         ch.outOfCharacter()
                         ch.emptyBackpack(bagSize = bagSize)
-                    elif bgfull == 'NOTFULL':
+                    elif bgfull == 'NOTFULL' or  bgfull == 'FALSE':
                         ch.outOfCharacter()
                 ch.leaveTheCity()
                 ch.startMove()
@@ -147,41 +157,47 @@ if ch.checkInTheCity():
             lap, side, fails = 0, "1", 0
             while True:
                 if lap > 0 and lap % 7 == 0:
-                    bgfull = ch.bagFullness(bagSize = bagSize)
-                    if bgfull == 'FULL':
-                        process.terminate()
-                        ch.relogin()
-                        farmStartTime = time.time()
-                        process = subprocess.Popen(['py', 'walkClanMessages.py'])
-                        ch.activate()
-                        if ch.checkInTheCity():
-                            if ch.defineTheCityImage('Xinta'):
-                                checkBagAndGo(notCheck = True)
+                    if not bagChecked:
+                        bgfull = ch.bagFullness(bagSize = bagSize)
+                        if bgfull == 'FULL':
+                            bagChecked = False
+                            process.terminate()
+                            ch.relogin()
+                            farmStartTime = time.time()
+                            process = subprocess.Popen(['py', 'walkClanMessages.py'])
+                            ch.activate()
+                            if ch.checkInTheCity():
+                                if ch.defineTheCityImage('Xinta'):
+                                    checkBagAndGo(notCheck = True)
+                                else:
+                                    process.terminate()
+                                    print("ANOTHER CITY")
+                                    fails += 1
                             else:
                                 process.terminate()
-                                print("ANOTHER CITY")
+                                print("NOT IN CITY")
                                 fails += 1
-                        else:
-                            process.terminate()
-                            print("NOT IN CITY")
-                            fails += 1
-                    elif bgfull == 'NOTFULL':
-                        ch.outOfCharacterMap()
+                        elif bgfull == 'NOTFULL':
+                            ch.outOfCharacterMap()
+                            bagChecked = False
+                        elif bgfull == 'FALSE':
+                            ch.outOfCharacterMap()
                 farmGold = ch.farmingGold(magic = False, magnetAngle = side) 
                 if farmGold == "Battle":
                     lap += 1
                     fails = 0
+                    bagChecked = False
                 elif farmGold == "KILLED":
                     fails = 0
                 elif farmGold == "FAILED":
                     fails += 1 
-                    lap += 1
                 elif farmGold == "NOBOTS":
                     fails += 1
                     sleep(1)
                 elif farmGold == "FailedBattle":
                     fails += 1 
                     lap += 1
+                    bagChecked = False
                 if lap > 0 and lap % 8 == 0:
                     if location == '2':
                         ch.followTheRoutePumpkin(routeXintaRight2)
@@ -203,6 +219,7 @@ if ch.checkInTheCity():
                     if ch.checkInTheCity():
                         if ch.defineTheCityImage('Xinta'):
                             checkBagAndGo()
+                            bagChecked = False
                 if fails >= 10:
                     ch.send_message("MORE 10 FAILS | sleep 60 sec", ch.token2, timeOut = ch.to1)
                     sleep(60)
@@ -214,6 +231,7 @@ if ch.checkInTheCity():
                     if ch.checkInTheCity():
                         if ch.defineTheCityImage('Xinta'):
                             checkBagAndGo()
+                            bagChecked = False
                 if ch.noNPC >= 100:
                     print("NPCs are missing. More 100 Attempts")
                     break

@@ -2171,15 +2171,29 @@ class MainClass:
 				print('    See >= 2 bots')
 				self.npcCount = 2
 				sorted_objects = sorted(botList, key=lambda obj: distance((window_center_x, window_center_y), obj))
-				closest_objects = sorted_objects[:2]
-				if self.farm12 == 1:
-					print('Attack first bot')
-					click(closest_objects[0])
-					self.farm12 = 2
-				elif self.farm12 == 2:
-					print('Attack 2nd bot')
-					click(closest_objects[1])
-					self.farm12 = 1
+				closest_objects = sorted_objects[:3]
+				if len(botList) == 2:
+					if self.farm12 == 1:
+						print('Attack first bot')
+						click(closest_objects[0])
+						self.farm12 = 2
+					elif self.farm12 == 2 or self.farm12 == 3:
+						print('Attack 2nd bot')
+						click(closest_objects[1])
+						self.farm12 = 1
+				else:
+					if self.farm12 == 1:
+						print('Attack first bot')
+						click(closest_objects[0])
+						self.farm12 = 2
+					elif self.farm12 == 2:
+						print('Attack 2nd bot')
+						click(closest_objects[1])
+						self.farm12 = 3
+					elif self.farm12 == 3:
+						print('Attack 3rd bot')
+						click(closest_objects[2])
+						self.farm12 = 1
 			elif len(botList) == 1:
 				self.npcCount = 1
 				print('    1 bot')
@@ -3023,21 +3037,10 @@ class MainClass:
 			return False
 		def logFullnessHandler(fullBag = bagSize, keyPhrase = "text = ????????????? ?????: "):
 			print(f"LS the log file | Start with {self.endingIndex}")
-			with open(log_file_path, 'r') as file:
-				file = file.read()
-			position = file.rfind(keyPhrase, self.endingIndex)
-			if position != -1:
-				print(f'  LOG 1 SUCCES {keyPhrase} found on position {position}')
-				fullness = file[position + len(keyPhrase) : position + len(keyPhrase) + 2]
-				print(f"    Fullness is {fullness}")
-				if int(fullness) >= fullBag:
-					print(f"      The bag is overflowing | Log check is successful")
-					return "FULL"
-				else:
-					print(f"      Bag is not full - {fullness}")
-					return "NOTFULL"
-			else:
-				position = file.rfind("Çàðåçåðâèðîâàííûé îïûò: ", self.endingIndex)
+			for _ in range(3):
+				with open(log_file_path, 'r') as file:
+					file = file.read()
+				position = file.rfind(keyPhrase, self.endingIndex)
 				if position != -1:
 					print(f'  LOG 1 SUCCES {keyPhrase} found on position {position}')
 					fullness = file[position + len(keyPhrase) : position + len(keyPhrase) + 2]
@@ -3049,15 +3052,28 @@ class MainClass:
 						print(f"      Bag is not full - {fullness}")
 						return "NOTFULL"
 				else:
-					print(f'  log FAILED {keyPhrase} not found within range [{self.endingIndex} - end]')
-					return "FALSE"
+					position = file.rfind("Çàðåçåðâèðîâàííûé îïûò: ", self.endingIndex)
+					if position != -1:
+						print(f'  LOG 1 SUCCES {keyPhrase} found on position {position}')
+						fullness = file[position + len(keyPhrase) : position + len(keyPhrase) + 2]
+						print(f"    Fullness is {fullness}")
+						if int(fullness) >= fullBag:
+							print(f"      The bag is overflowing | Log check is successful")
+							return "FULL"
+						else:
+							print(f"      Bag is not full - {fullness}")
+							return "NOTFULL"
+					else:
+						print(f'  log FAILED {keyPhrase} not found within range [{self.endingIndex} - end]')
+						sleep(1)
+			return "NOTFOUND"
 		if econonyOpen():
 			lFH = logFullnessHandler()
 			if lFH == 'FULL':
 				return 'FULL'
 			elif lFH == 'NOTFULL':
 				return 'NOTFULL' 
-			elif lFH == "FALSE":
+			elif lFH == "NOTFOUND":
 				return 'FALSE' 
 		else:
 			return "FALSE"
