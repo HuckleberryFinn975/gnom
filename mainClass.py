@@ -6,6 +6,7 @@ import random
 import time
 import json
 import math
+import re
 from ahk import AHK
 from time import sleep
 from recognize import recognize
@@ -3038,7 +3039,7 @@ class MainClass:
 		def logFullnessHandler(fullBag = bagSize, keyPhrase = "text = ????????????? ?????: "):
 			print(f"LS the log file | Start with {self.endingIndex}")
 			for _ in range(3):
-				with open(log_file_path, 'r') as file:
+				with open(log_file_path, 'r', encoding="utf-8") as file:
 					file = file.read()
 				position = file.rfind(keyPhrase, self.endingIndex)
 				if position != -1:
@@ -3053,9 +3054,12 @@ class MainClass:
 						return "NOTFULL"
 				else:
 					print("  Not Found | Search different unicode")
-					position = file.rfind("Çàïîëíåííîñòü ñóìêè: ", self.endingIndex)
-					if position != -1:
-						print(f'  LOG 1 SUCCES {keyPhrase} found on position {position}')
+					pattern = r"text\s=\s[^\s]{13}\s[^\s]{5}:\s"
+					matches = list(re.finditer(pattern, file))
+					if matches:
+						last_match = matches[-1]
+						print("    Patern found", last_match.group())
+						position = last_match.start()
 						fullness = file[position + len(keyPhrase) : position + len(keyPhrase) + 2]
 						print(f"    Fullness is {fullness}")
 						if int(fullness) >= fullBag:
@@ -3065,6 +3069,7 @@ class MainClass:
 							print(f"      Bag is not full - {fullness}")
 							return "NOTFULL"
 					else:
+						print("Patern not found")
 						print(f"  different unicode also not found")
 						print(f'  log FAILED {keyPhrase} not found within range [{self.endingIndex} - end]')
 						sleep(1)
