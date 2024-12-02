@@ -108,8 +108,8 @@ if ch.checkInTheCity():
                         checkBagAndGo()
                         bagChecked = False
             if fails >= 10:
-                ch.send_message("MORE 10 FAILS | sleep 60 sec", ch.token1, timeOut = ch.to1)
-                sleep(60)
+                ch.send_message("MORE 10 FAILS | sleep 30 sec", ch.token1, timeOut = ch.to1)
+                sleep(30)
                 process.terminate()
                 ch.relogin()
                 farmStartTime = time.time()

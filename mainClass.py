@@ -3052,7 +3052,8 @@ class MainClass:
 						print(f"      Bag is not full - {fullness}")
 						return "NOTFULL"
 				else:
-					position = file.rfind("Çàðåçåðâèðîâàííûé îïûò: ", self.endingIndex)
+					print("  Not Found | Search different unicode")
+					position = file.rfind("Çàïîëíåííîñòü ñóìêè: ", self.endingIndex)
 					if position != -1:
 						print(f'  LOG 1 SUCCES {keyPhrase} found on position {position}')
 						fullness = file[position + len(keyPhrase) : position + len(keyPhrase) + 2]
@@ -3064,6 +3065,7 @@ class MainClass:
 							print(f"      Bag is not full - {fullness}")
 							return "NOTFULL"
 					else:
+						print(f"  different unicode also not found")
 						print(f'  log FAILED {keyPhrase} not found within range [{self.endingIndex} - end]')
 						sleep(1)
 			return "NOTFOUND"
