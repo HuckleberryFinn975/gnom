@@ -90,12 +90,12 @@ class MainClass:
 			print(ex)
 	def runWindow(self):
 		self.endingIndex = 0
-		with open(log_file_path, 'w'):
+		with open(log_file_path, 'w', encoding='cp866'):
 			pass
 		command = f'''java -jar .\\Clients\\{data["images"][self.race]}.jar'''
 		try:
 			self.send_message(f"Running {data['images'][self.race]} | sleep 7...", self.token2)
-			with open(log_file_path, "a") as log_file:
+			with open(log_file_path, "a", encoding='cp866') as log_file:
 				subprocess.Popen(command, shell = True, stdout=log_file, stderr=subprocess.DEVNULL,
 					 creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
 			sleep(7)
@@ -3039,7 +3039,7 @@ class MainClass:
 		def logFullnessHandler(fullBag = bagSize, keyPhrase = "text = ????????????? ?????: "):
 			print(f"LS the log file | Start with {self.endingIndex}")
 			for _ in range(3):
-				with open(log_file_path, 'r', encoding="utf-8") as file:
+				with open(log_file_path, 'r', encoding='cp866') as file:
 					file = file.read()
 				position = file.rfind(keyPhrase, self.endingIndex)
 				if position != -1:
