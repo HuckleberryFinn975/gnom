@@ -12,6 +12,7 @@ from time import sleep
 from recognize import recognize
 from recognizeLetters import recognizeLetters
 from cities import cityTranslate
+from dataDict import data
 pyautogui.FAILSAFE = False
 
 jsonPath = "C:\\oaData\\tgData.json"
@@ -19,8 +20,7 @@ with open(jsonPath, 'r') as file:
     tgData = json.load(file)
 
 log_file_path = "logOasis.txt"
-data = {"titles": {"1": "ELF","2": "ORC", "3": "DEAD", "4": "HUMAN", "5": "DWARF"},
-		"images": {"1": "Elf", "2": "Orc", "3": "Dead", "4": "Human", "5": "Dwarf"}}
+
 equipmentCoors = {"helmet": 195, "amulet": (255, 420), "weapon": (470, 530), "armour": 585, "boots": 630, "flag": 690}
 
 class MainClass:
@@ -83,7 +83,21 @@ class MainClass:
 				print(f"  See {data['titles'][self.race]}")
 				win.activate()
 				win.move(x=0, y=0, width=950, height=1000)
-				sleep(3)
+				sleep(1.5)
+			else:
+				print(f"    AHK doesn't see {data['titles'][self.race]}")
+		except Exception as ex:
+			print(ex)
+	def hideResp(self):
+		ahk = AHK()
+		print(f"{data['images'][self.race]} | setting Window")
+		try:
+			win = ahk.find_window(title = f"{data['titles'][self.race]}")
+			if win:
+				print(f"  See {data['titles'][self.race]}")
+				win.activate()
+				win.move(x=0, y=0, width=1, height=1)
+				sleep(1.5)
 			else:
 				print(f"    AHK doesn't see {data['titles'][self.race]}")
 		except Exception as ex:
@@ -93,12 +107,18 @@ class MainClass:
 		with open(log_file_path, 'w', encoding='cp866'):
 			pass
 		command = f'''java -jar .\\Clients\\{data["images"][self.race]}.jar'''
+		if self.race in "R5 R6 R7 R8 R9 R10".split():
+			command = f'''java -jar .\\Clients\\Resp\\{data["images"][self.race]}.jar'''
 		try:
 			self.send_message(f"Running {data['images'][self.race]} | sleep 7...", self.token2)
 			with open(log_file_path, "a", encoding='cp866') as log_file:
 				subprocess.Popen(command, shell = True, stdout=log_file, stderr=subprocess.DEVNULL,
 					 creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
-			sleep(7)
+			if pyautogui.locateOnScreen("img/collection/LOGO.png", minSearchTime = 7, region = (0, 0, 900, 900), confidence=.85):
+				print("See 'LOGO.png'")
+				return True
+			else:
+				print("DONT SEE 'LOGO.png'")
 		except Exception as ex:
 			print(ex)
 	def relogin(self):
@@ -107,7 +127,7 @@ class MainClass:
 		self.runWindow()
 		self.setWindow()
 		press('enter')
-		sleep(5)
+		sleep(2)
 	@classmethod
 	def rightSoft(self):
 		click(850, 930)
@@ -214,7 +234,7 @@ class MainClass:
 	def checkInTheCity(self):
 		print("Search inTheCity")
 		for _ in range(6):
-			inTheCity = pyautogui.locateOnScreen(f"img/collection/inTheCity.png", minSearchTime=4, region=(0,0,1280, 1024), confidence=.8)
+			inTheCity = pyautogui.locateOnScreen(f"img/collection/inTheCity.png", minSearchTime=7, region=(0,0,1280, 1024), confidence=.8)
 			if inTheCity:
 				self.send_message("  The character is in the city", self.token2)
 				return True
@@ -3198,3 +3218,46 @@ class MainClass:
 				self.relogin()
 				attempt += 1
 				continue
+	def statsFunc(self):
+		print("Start Stats-Function")
+		def econonyOpen():
+			print("Open the economy")
+			for _ in range(3):
+				self.leftSoft()
+				economy = pyautogui.locateOnScreen(f"img/collection/lsEconomy.png", minSearchTime=2, region=(0,0,780,1024), confidence=.93)
+				if economy:
+					print("  See economyButton | Click")
+					click(economy)
+				else:
+					print("  Don't see economyButton")
+				sleep(.5)
+				if self.logHandler("client -> server: 145 wait for: 145"):
+					return True
+				economyMenu = pyautogui.locateOnScreen(f"img/collection/characterMenu.png", minSearchTime=2, region=(450,0,450,324), confidence=.9)
+				if economyMenu:
+					print("  See the economy menu")
+					return True
+				else:
+					print("  Don't see economy menu")
+				if self.clMessageCheckImage():
+					continue
+			print("    Economy open Failed | FALSE")
+			return False
+		if econonyOpen():
+			self.rightSoft()
+			sleep(.5)
+			stats = pyautogui.locateOnScreen(f"img/collection/stats.png", minSearchTime=2, region=(500,0,780,1024), confidence=.9)
+			if stats:
+				click(stats)
+				sleep(.3)
+				click(400, 350) # input befor
+				sleep(.3)
+				press('1')
+				sleep(.3)
+				click(400, 585) # click OK. 
+				sleep(.5)
+				self.leftSoft()
+				sleep(.5)
+				self.rightSoft()
+				sleep(.5)
+				self.leftSoft()
