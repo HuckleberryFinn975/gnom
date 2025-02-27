@@ -8,7 +8,7 @@ from ahk import AHK
 MainClass.moveTerminal()
 races = "R5 R6 R7 R8 R9 R10".split()
 cords = ((0, 19), (11, 30), (16, 35), (0, 49), (15, 49), (0, 38))
-for k in range(6):
+for k in range(1):
     ch = MainClass(races[k], flead="9999")
     ch.relogin()
     ch.activate()
@@ -20,7 +20,6 @@ for k in range(6):
                         if ch.moveOnMap(cords[k][0], cords[k][1]):
                             ch.statsFunc()
                             ch.hideResp()
-        
 try:
     ahk = AHK()
     win = ahk.find_window(title = 'Windows PowerShell')
