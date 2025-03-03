@@ -57,7 +57,7 @@ class MainClass:
 			if win:
 				win.activate()
 				win.move(x=825, y=0, width=400, height=900)
-				sleep(3)
+				sleep(.5)
 		except Exception as ex:
 			print(ex)
 	def killWindow(self):
@@ -134,13 +134,16 @@ class MainClass:
 	@classmethod
 	def leftSoft(self):
 		click(450, 930)
-	def activate(self):
+	def activate(self, terminal = False):
 		ahk = AHK()
 		try:
-			win = ahk.find_window(title = f"{data['titles'][self.race]}")
+			title = f"{data['titles'][self.race]}"
+			if terminal:
+				title = 'Windows PowerShell'
+			win = ahk.find_window(title = title)
 			if win:
 				win.activate()
-				sleep(3)
+				sleep(.5)
 			else:
 				print(f"AHK doesn't see {data['titles'][self.race]}")
 		except Exception as ex:
@@ -2876,62 +2879,29 @@ class MainClass:
 									return False
 		self.send_message("  Route completion Successful", self.token2)
 		return True
-	def followTheRouteBats(self, route, unit = "Dragon", collect = False, exactCoors = (-1, -1), side = "2", zero = False, bats = True):
+	def followTheRouteNPC(self, route, unit = "Dragon", collect = False, exactCoors = (-1, -1), side = "2", zero = False, bats = True):
 		self.send_message("Move along the route (Bats)", self.token2)
 		point = 0
 		for coors in route:
-			if exactCoors[0] == 0 and exactCoors[1] == 0:
-				deltaX, deltaY = 0, 0    
-			else:
-				deltaX, deltaY = random.randint(-1, 1), random.randint(-1, 1)
+			deltaX, deltaY = 0, 0
 			print(f"  Delta X, Delta Y - {deltaX}, {deltaY}")
-			if coors[0] == exactCoors[0] and coors[1] == exactCoors[1]:
-				print("    EXACT COORS MATCH")
-				if deltaX != 0:
-					print(f"      DeltaX = {deltaX} | DeltaY is 0")
-					deltaY = 0
 			if not self.moveOnMap(coors[0] + deltaX, coors[1] + deltaY, npcAttack = False):
 				print(f"    Can't move in coordinates {coors[0] + deltaX} {coors[1] + deltaY}")
 				self.send_message("    Route completion FAILED | FALSE", self.token2)
-				return False
+				# return False
 			else:
 				point += 1
 				print(f"    Point {point} ({coors[0]}:{coors[1]}) has been reached")
-				if zero:
-					if self.battleNumber > 0 and self.battleNumber % 3 == 0:
-						if self.zeroExp():
-							return False
 				if collect:
-					for k in range(2):
+					for k in range(1):
 						if coors[2] == 'noFarm':
 							break
-						fg = self.farmingGold(unit = unit, magic = False, magnetAngle = side, region=coors[2])
-						if fg == "NOBOTS":
-							if not bats:
-								break
-						elif fg == "Battle":
-							break
-						elif fg == "KILLED":
-							if self.npcCount == 1:
-								print("    Only 1 NPC. break")
-								break
-						elif fg == "FailedBattle":
-							return False
 						else:
-							if bats:
-								if exactCoors[0] == 0 and exactCoors[1] == 0:
-									deltaX, deltaY = 0, 0    
-								else:
-									deltaX, deltaY = random.randint(-1, 1), random.randint(-1, 1)
-								if coors[0] == exactCoors[0] and coors[1] == exactCoors[1]:
-									print("    EXACT COORS MATCH")
-									if deltaX != 0:
-										print(f"      DeltaX = {deltaX} | DeltaY is 0")
-										deltaY = 0
-								if not self.moveOnMap(coors[0] + deltaX, coors[1] + deltaY, npcAttack = False):
-									print(f"    Can't move in coordinates {coors[0] + deltaX} {coors[1] + deltaY}")
-									self.send_message("    Route completion FAILED | FALSE", self.token2)
-									return False
+							if not self.moveOnMap(coors[0] + deltaX, coors[1] + deltaY, npcAttack = False):
+								print(f"    Can't move in coordinates {coors[0] + deltaX} {coors[1] + deltaY}")
+								self.send_message("    Route completion FAILED | FALSE", self.token2)
+								# return False
+			sleep(.45)
 		self.send_message("  Route completion Successful", self.token2)
 		return True
 	def orderTeleport(self, town):
